@@ -3,12 +3,16 @@ package main
 import (
 	"github.com/ifechigo/gin-quik/controllers"
 	"github.com/ifechigo/gin-quik/models"
+	"github.com/ifechigo/gin-quik/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	router := gin.Default()
+
+	//logger
+	router.Use(utils.Logger())
 
 	// Connect to database
 	models.ConnectDatabase()
@@ -21,5 +25,5 @@ func main() {
 	router.POST("/api/v1/wallets/:id/debit", controllers.DebitWallet)
 	
 	// Run the server
-	router.Run()
+	router.Run(":5005")
 }

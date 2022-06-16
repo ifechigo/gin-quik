@@ -13,6 +13,8 @@ import (
 	
 )
 
+
+
 // GET /api/v1/wallets
 // Find all wallets
 func FindWallets(c *gin.Context) {
@@ -21,7 +23,9 @@ func FindWallets(c *gin.Context) {
 	models.DB.Find(&wallets)
 
 	c.JSON(http.StatusOK, gin.H{"data": wallets})
+	
 }
+
 
 
 // POST /api/v1/wallets
@@ -30,6 +34,7 @@ func CreateWallet(c *gin.Context) {
 	// Validate input
 	var input utils.CreateWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
+		
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
