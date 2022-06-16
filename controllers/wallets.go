@@ -3,30 +3,15 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/shopspring/decimal"
-
 	"github.com/gin-gonic/gin"
+
+	"github.com/ifechigo/gin-quik/utils"
 	"github.com/ifechigo/gin-quik/models"
+	
 )
-
-type CreateWalletInput struct {
-	Firstname  string `json:"firstname" binding:"required"`
-	Lastname string `json:"lastname" binding:"required"`
-}
-
-type UpdateWalletInput struct {
-	Firstname  string `json:"firstname"`
-	Lastname string `json:"lastname"`
-}
-
-type CreditWalletInput struct {
-	Credit string `json:"amount"`
-}
-
-type DebitWalletInput struct {
-	Debit string `json:"amount"`
-}
 
 // GET /api/v1/wallets
 // Find all wallets
@@ -43,7 +28,7 @@ func FindWallets(c *gin.Context) {
 // Create new wallet
 func CreateWallet(c *gin.Context) {
 	// Validate input
-	var input CreateWalletInput
+	var input utils.CreateWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -69,7 +54,7 @@ func WalletBalance(c *gin.Context) {
 	}
 
 	// Validate input
-	var input CreditWalletInput
+	var input utils.CreditWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -91,9 +76,16 @@ func CreditWallet(c *gin.Context) {
 	}
 
 	// Validate input
-	var input CreditWalletInput
+	var input utils.CreditWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//checking Negative Value
+	amt, _ := strconv.ParseFloat(input.Credit, 32)
+	if amt < 0.000 || input.Credit == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "amount cannot be Negative or Empty"})
 		return
 	}
 
@@ -104,7 +96,6 @@ func CreditWallet(c *gin.Context) {
 	}
 
 	amount := fmt.Sprintf("%v", wallet.Amount)
-	
 	credit, _ := decimal.NewFromString(amount)
 	newAmount := walletBalance.Add(credit)
 
@@ -124,15 +115,21 @@ func DebitWallet(c *gin.Context) {
 	}
 
 	// Validate input
-	var input DebitWalletInput
+	var input utils.DebitWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	
+	//checking Negative Value
+	amt, _ := strconv.ParseFloat(input.Debit, 32)
+	if amt < 0.000 || input.Debit == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "amount cannot be Negative or Empty"})
 		return
 	}
 
 	//calculating new balance
 	amount := fmt.Sprintf("%v", wallet.Amount)
-
 	walletBalance, err := decimal.NewFromString(amount)
 	if err != nil {
 		panic(err)
