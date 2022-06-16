@@ -38,18 +38,6 @@ func FindWallets(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": wallets})
 }
 
-// GET /api/v1/wallets/:id
-// Find a wallet
-func FindWallet(c *gin.Context) {
-	// Get model if exist
-	var wallet models.Wallet
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&wallet).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Wallet not found!"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": wallet})
-}
 
 // POST /api/v1/wallets
 // Create new wallet
@@ -70,9 +58,9 @@ func CreateWallet(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": wallet})
 }
 
-// PUT /api/v1/wallets/:id
-// Update a wallet
-func UpdateWallet(c *gin.Context) {
+//GET /api/v1/wallet/:id/balance
+//Balance in Wallet
+func WalletBalance(c *gin.Context) {
 	// Get model if exist
 	var wallet models.Wallet
 	if err := models.DB.Where("id = ?", c.Param("id")).First(&wallet).Error; err != nil {
@@ -81,20 +69,18 @@ func UpdateWallet(c *gin.Context) {
 	}
 
 	// Validate input
-	var input UpdateWalletInput
-
+	var input CreditWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	models.DB.Model(&wallet).Updates(models.Wallet{
-		Firstname: input.Firstname, Lastname: input.Lastname})
-
-	c.JSON(http.StatusOK, gin.H{"data": wallet})
+	c.JSON(http.StatusOK, gin.H{"Balance": wallet.Amount})
 }
 
-//PUT /api/v1/wallet/:id/credit
+
+
+//POST /api/v1/wallet/:id/credit
 //Credit a wallet
 func CreditWallet(c *gin.Context) {
 	// Get model if exist
@@ -112,7 +98,7 @@ func CreditWallet(c *gin.Context) {
 	}
 
 	//calculating new balance
-	WalletBalance, err := decimal.NewFromString(input.Credit)
+	walletBalance, err := decimal.NewFromString(input.Credit)
 	if err != nil {
 		panic(err)
 	}
@@ -120,14 +106,14 @@ func CreditWallet(c *gin.Context) {
 	amount := fmt.Sprintf("%v", wallet.Amount)
 	
 	credit, _ := decimal.NewFromString(amount)
-	newAmount := WalletBalance.Add(credit)
+	newAmount := walletBalance.Add(credit)
 
 	models.DB.Model(&wallet).Updates(models.Wallet{Amount: newAmount.InexactFloat64()})
 
 	c.JSON(http.StatusOK, gin.H{"data": wallet})
 }
 
-//PUT /api/v1/wallet/:id/debit
+//POST /api/v1/wallet/:id/debit
 //Debit a wallet
 func DebitWallet(c *gin.Context) {
 	// Get model if exist
@@ -147,13 +133,13 @@ func DebitWallet(c *gin.Context) {
 	//calculating new balance
 	amount := fmt.Sprintf("%v", wallet.Amount)
 
-	WalletBalance, err := decimal.NewFromString(amount)
+	walletBalance, err := decimal.NewFromString(amount)
 	if err != nil {
 		panic(err)
 	}
 
 	debit, _ := decimal.NewFromString(input.Debit)
-	newAmount := WalletBalance.Sub(debit)
+	newAmount := walletBalance.Sub(debit)
 
 	if newAmount.InexactFloat64() < 0.00000000 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Balance cannot be less than zero"})
@@ -165,17 +151,4 @@ func DebitWallet(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": wallet})
 }
 
-// DELETE /api/v1/wallets/:id
-// Delete a wallet
-func DeleteWallet(c *gin.Context) {
-	// Get model if exist
-	var wallet models.Wallet
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&wallet).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-		return
-	}
 
-	models.DB.Delete(&wallet)
-
-	c.JSON(http.StatusOK, gin.H{"data": true})
-}
