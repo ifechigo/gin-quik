@@ -5,15 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/shopspring/decimal"
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
 
-	"github.com/ifechigo/gin-quik/utils"
 	"github.com/ifechigo/gin-quik/models"
-	
+	"github.com/ifechigo/gin-quik/middleware"
 )
-
-
 
 // GET /api/v1/wallets
 // Find all wallets
@@ -23,18 +20,16 @@ func FindWallets(c *gin.Context) {
 	models.DB.Find(&wallets)
 
 	c.JSON(http.StatusOK, gin.H{"data": wallets})
-	
+
 }
-
-
 
 // POST /api/v1/wallets
 // Create new wallet
 func CreateWallet(c *gin.Context) {
 	// Validate input
-	var input utils.CreateWalletInput
+	var input middleware.CreateWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		
+
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -59,7 +54,7 @@ func WalletBalance(c *gin.Context) {
 	}
 
 	// Validate input
-	var input utils.CreditWalletInput
+	var input middleware.CreditWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -67,8 +62,6 @@ func WalletBalance(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"Balance": wallet.Amount})
 }
-
-
 
 //POST /api/v1/wallet/:id/credit
 //Credit a wallet
@@ -81,7 +74,7 @@ func CreditWallet(c *gin.Context) {
 	}
 
 	// Validate input
-	var input utils.CreditWalletInput
+	var input middleware.CreditWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -120,12 +113,12 @@ func DebitWallet(c *gin.Context) {
 	}
 
 	// Validate input
-	var input utils.DebitWalletInput
+	var input middleware.DebitWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	//checking Negative Value
 	amt, _ := strconv.ParseFloat(input.Debit, 32)
 	if amt < 0.000 || input.Debit == "" {
@@ -147,10 +140,8 @@ func DebitWallet(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Balance cannot be less than zero"})
 		return
 	}
-	
+
 	models.DB.Model(&wallet).Updates(models.Wallet{Amount: newAmount.InexactFloat64()})
 
 	c.JSON(http.StatusOK, gin.H{"data": wallet})
 }
-
-

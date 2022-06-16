@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/ifechigo/gin-quik/controllers"
 	"github.com/ifechigo/gin-quik/models"
-	"github.com/ifechigo/gin-quik/utils"
+	"github.com/ifechigo/gin-quik/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +12,7 @@ func main() {
 	router := gin.Default()
 
 	//logger
-	router.Use(utils.Logger())
+	router.Use(middleware.Logger())
 
 	// Connect to database
 	models.ConnectDatabase()

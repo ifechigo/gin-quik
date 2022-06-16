@@ -1,4 +1,4 @@
-package utils
+package middleware
 
 type CreateWalletInput struct {
 	Firstname  string `json:"firstname" binding:"required"`

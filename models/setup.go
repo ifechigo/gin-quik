@@ -1,8 +1,10 @@
 package models
 
 import (
-	"gorm.io/gorm"
+	"log"
+
 	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 const (
@@ -10,7 +12,6 @@ const (
 	DB_PASSWORD = "root"
 	DB_NAME = "my_data"
 	DB_HOST = "127.0.0.1"
-	DB_PORT = "3306"
 )
 
 var DB *gorm.DB
@@ -27,6 +28,7 @@ func ConnectDatabase() {
 	}
 
 	database.AutoMigrate(&Wallet{})
+	log.Println("Databasee Migration Completed!")
 
 	DB = database
 }
