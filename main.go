@@ -17,7 +17,9 @@ func main() {
 	router.GET("/api/v1/wallets", controllers.FindWallets)
 	router.GET("/api/v1/wallets/:id", controllers.FindWallet)
 	router.POST("/api/v1/wallets", controllers.CreateWallet)
-	router.PATCH("/api/v1/wallets/:id", controllers.UpdateWallet)
+	router.PUT("/api/v1/wallets/:id", controllers.UpdateWallet)
+	router.PUT("/api/v1/wallets/:id/credit", controllers.CreditWallet)
+	router.PUT("/api/v1/wallets/:id/debit", controllers.DebitWallet)
 	router.DELETE("/api/v1/wallets/:id", controllers.DeleteWallet)
 
 	// Run the server
