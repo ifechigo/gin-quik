@@ -60,6 +60,8 @@ func WalletBalance(c *gin.Context) {
 		return
 	}
 
+	//Cache balance 
+	middleware.GetCache(c.Param("id"))
 	c.JSON(http.StatusOK, gin.H{"Balance": wallet.Amount})
 }
 
@@ -99,6 +101,8 @@ func CreditWallet(c *gin.Context) {
 
 	models.DB.Model(&wallet).Updates(models.Wallet{Amount: newAmount.InexactFloat64()})
 
+	//Cache balance 
+	middleware.PostCache(c.Param("id"), wallet.Amount)
 	c.JSON(http.StatusOK, gin.H{"data": wallet})
 }
 
@@ -143,5 +147,7 @@ func DebitWallet(c *gin.Context) {
 
 	models.DB.Model(&wallet).Updates(models.Wallet{Amount: newAmount.InexactFloat64()})
 
+	//Cache balance 
+	middleware.PostCache(c.Param("id"), wallet.Amount)
 	c.JSON(http.StatusOK, gin.H{"data": wallet})
 }
