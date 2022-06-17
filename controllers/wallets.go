@@ -29,14 +29,12 @@ func CreateWallet(c *gin.Context) {
 	// Validate input
 	var input middleware.CreateWalletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Create wallet
-	wallet := models.Wallet{
-		Firstname: input.Firstname, Lastname: input.Lastname, Amount: 0.00}
+	wallet := models.Wallet{Firstname: input.Firstname, Lastname: input.Lastname, Amount: 0.00}
 
 	models.DB.Create(&wallet)
 
@@ -94,7 +92,6 @@ func CreditWallet(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-
 	amount := fmt.Sprintf("%v", wallet.Amount)
 	credit, _ := decimal.NewFromString(amount)
 	newAmount := walletBalance.Add(credit)
@@ -136,10 +133,11 @@ func DebitWallet(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-
 	debit, _ := decimal.NewFromString(input.Debit)
 	newAmount := walletBalance.Sub(debit)
 
+
+	//Balance cannot be less than zero
 	if newAmount.InexactFloat64() < 0.00000000 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Balance cannot be less than zero"})
 		return
