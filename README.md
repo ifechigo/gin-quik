@@ -1,4 +1,4 @@
-# Bookstore REST API using Gin and Gorm
+# Wallet REST API using Gin and Gorm
 
 How to use:
 
